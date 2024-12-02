@@ -10,6 +10,7 @@ import csv
 
 from utils import pickle_load, pickle_save
 from metrics import rmse, norm_rmse, mape
+from online_training import get_params
 
 
 def concat(array1, array2):
@@ -77,7 +78,7 @@ def get_mse(cp_params, base_pred_results_all):
     return avg_results
 
 
-def get_mse_single_file(regions, aheads, base_pred, verbose=True, plot=True):
+def get_mse_single_file(regions, aheads, base_pred, verbose=True, plot=False):
     results = {}
     for region in regions:
         results[region] = {}
@@ -86,6 +87,7 @@ def get_mse_single_file(regions, aheads, base_pred, verbose=True, plot=True):
 
     base_pred = base_pred['base_pred']
     regions = list(base_pred[0][0].keys())
+    print(regions)
     for region in regions:
         for ahead in aheads:
             _, y_preds, y_trues = prepare_scores(base_pred, region, ahead)
@@ -110,13 +112,7 @@ def main():
     args = parser.parse_args()
     input_file = args.input    # for example: 1
     
-    cp_params = None
-    with open(f'../../setup/exp_params/{input_file}.yaml', 'r') as stream:
-        try:
-            cp_params = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            print('Error in reading parameters file')
-            print(exc)
+    cp_params = get_params(input_file=input_file)
     try:
         regions = cp_params['regions']
         aheads = cp_params['aheads']

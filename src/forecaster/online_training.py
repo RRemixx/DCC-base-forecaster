@@ -286,7 +286,7 @@ def train_and_forcast(last_train_time, params, pretrained_model_state, train=Tru
             
         if train or pretrained_model_state is None:
             epochs = params['training_parameters']['epochs']
-            if params['week_retrain'] == False and pretrained_model_state is not None:
+            if params['week_retrain'] == True and pretrained_model_state is not None:
                 model.load_state_dict(pretrained_model_state)
                 epochs = params['week_retrain_epochs']
 
@@ -387,6 +387,9 @@ def get_params(input_file='1'):
         params['data_params']['start_time'] = Week.fromstring(params['data_params']['start_time']).cdcformat()
         params['test_time'] = Week.fromstring(str(params['test_time'])).cdcformat()
     
+    if params['week_retrain'] == False:
+        params['week_retrain_period'] = params['total_steps']
+    
     print('Paramaters loading success.')
     
     return params
@@ -416,7 +419,7 @@ def run_online_training(params):
             else:
                 train = False
             current_time = convert_to_datetime(starting_time) + timedelta(minutes=i)
-            if current_time != test_time:
+            if current_time < test_time:
                 predictions, addition_infos, pretrained_model_state = train_and_forcast(current_time, params, pretrained_model_state, power_df=power_df, train=train)
                 base_pred.append((predictions, addition_infos))
             if current_time >= test_time:
@@ -476,6 +479,7 @@ def main():
     
     params = get_params(input_file)
     data_id = int(params['data_id'])
+    print(params['week_retrain_period'])
     results = run_online_training(params)
     pickle_save(f'../../results/base_pred/saved_pred_{data_id}.pickle', results)
 
