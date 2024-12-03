@@ -286,7 +286,7 @@ def train_and_forcast(last_train_time, params, pretrained_model_state, train=Tru
             
         if train or pretrained_model_state is None:
             epochs = params['training_parameters']['epochs']
-            if params['week_retrain'] == True and pretrained_model_state is not None:
+            if params['week_retrain'] == False and pretrained_model_state is not None:
                 model.load_state_dict(pretrained_model_state)
                 epochs = params['week_retrain_epochs']
 
